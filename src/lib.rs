@@ -24,34 +24,20 @@ pub enum Cell {
     Alive = 1,
 }
 
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Alive => Cell::Dead,
+            Cell::Dead => Cell::Alive,
+        };
+    }
+}
+
 #[wasm_bindgen]
 pub struct Universe {
     width: u32,
     height: u32,
     cells: Vec<Cell>,
-}
-
-impl Universe {
-    fn get_index(&self, row: u32, column: u32) -> usize {
-        (row * self.width + column) as usize
-    }
-
-    fn live_neighbour_count(&self, row: u32, column: u32) -> u8 {
-        let mut count = 0;
-        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
-            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
-                if delta_row == delta_col {
-                    continue;
-                }
-
-                let neighbour_row = (row + delta_row) % self.height;
-                let neighbour_col = (column + delta_col) % self.height;
-                let idx = self.get_index(neighbour_row, neighbour_col);
-                count += self.cells[idx] as u8
-            }
-        }
-        count
-    }
 }
 
 #[wasm_bindgen]
@@ -63,14 +49,6 @@ impl Universe {
                 let idx = self.get_index(row, col);
                 let cell = self.cells[idx];
                 let live_neighbours = self.live_neighbour_count(row, col);
-
-                // log!(
-                //     "cell[{}, {}] is initially {:?} and has {} live neighbors",
-                //     row,
-                //     col,
-                //     cell,
-                //     live_neighbours,
-                // );
 
                 let next_cell = match (cell, live_neighbours) {
                     (Cell::Alive, x) if x < 2 => Cell::Dead,
@@ -130,9 +108,34 @@ impl Universe {
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
     }
+
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        self.cells[idx].toggle();
+    }
 }
 
 impl Universe {
+    fn get_index(&self, row: u32, column: u32) -> usize {
+        (row * self.width + column) as usize
+    }
+
+    fn live_neighbour_count(&self, row: u32, column: u32) -> u8 {
+        let mut count = 0;
+        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
+            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
+                if delta_row == delta_col {
+                    continue;
+                }
+
+                let neighbour_row = (row + delta_row) % self.height;
+                let neighbour_col = (column + delta_col) % self.height;
+                let idx = self.get_index(neighbour_row, neighbour_col);
+                count += self.cells[idx] as u8
+            }
+        }
+        count
+    }
     pub fn get_cells(&self) -> &[Cell] {
         &self.cells
     }
