@@ -1,5 +1,5 @@
 <h1 align="center">Conway's Game of Life 🦀</h1>
-<p align="center"><img src="https://i.imgur.com/xe9L9DY.png"/></p>
+<p align="center"><img src="https://i.imgur.com/xqu7jdr.gif" width="350"/></p>
 
 ---
 
